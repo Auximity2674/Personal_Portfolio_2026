@@ -993,10 +993,24 @@ button { font: inherit; color: inherit; }
   .hero__title { font-size: clamp(3.4rem, 15vw, 6rem); }
   .about__grid, .exp__intro, .edu, .about__intro { grid-template-columns: 1fr; }
   .cradle { justify-self: center; max-width: 440px; }
-  /* same pinned sideways scroll as desktop, with narrower steps */
-  .pipeline { padding-bottom: clamp(64px, 12vw, 120px); }
-  .step { width: min(78vw, 340px); padding: 34px 24px 0 0; }
-  .step__n { font-size: 2.25rem; margin-bottom: 8px; }
+  /* Jobdesk on phones: a stack of cards (desktop keeps the pinned sideways scroll) */
+  .pipeline { overflow: visible; margin-top: 28px; padding-bottom: clamp(64px, 12vw, 120px); }
+  .pipeline__progress { display: none; }
+  .pipeline__track {
+    display: grid; gap: 12px; width: auto;
+    padding-inline: var(--gutter);
+    transform: none !important;
+  }
+  .step {
+    width: auto; padding: 22px 22px 24px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--line); border-radius: 16px;
+    transition: border-color .5s;
+  }
+  .step.is-on { border-color: rgba(124, 196, 255, .35); }
+  .step::before { left: auto; right: 22px; top: 28px; }
+  .step__n { font-size: 2.25rem; margin-bottom: 10px; }
+  .step p { max-width: none; }
   .edu__brand { font-size: clamp(4rem, 22vw, 7.5rem); }
 }
 

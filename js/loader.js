@@ -70,7 +70,8 @@
 
   function resize() {
     W = innerWidth; H = innerHeight;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // phones have 3x screens; two full-screen canvases at that density is what made it stutter
+    dpr = mobile ? Math.min(window.devicePixelRatio || 1, 1.25) : Math.min(window.devicePixelRatio || 1, 2);
     [canvas, gCanvas].forEach(c => { c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); });
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     gctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -82,7 +83,7 @@
      3D globe
      ========================================================= */
   const G = {
-    n: mobile ? 520 : 950,
+    n: mobile ? 320 : 950,
     yaw: 0, pitch: -0.3, targetYaw: null, targetPitch: -0.3,
     scale: 0.6, alpha: 0, spin: 0.25,
     pins: [], arc: null
@@ -163,14 +164,16 @@
         gctx.beginPath(); gctx.moveTo(a[0], a[1]); gctx.lineTo(b[0], b[1]); gctx.stroke();
       }
     };
-    for (let m = 0; m < 12; m++) {
-      const lon = m * 30, pts = [];
-      for (let la = -90; la <= 90; la += 10) { const v = toVec(la, lon); pts.push(project(v[0], v[1], v[2], [0, 0, 0, 0])); }
+    // fewer, coarser lines on phones
+    const mStep = mobile ? 45 : 30, segStep = mobile ? 15 : 10, pStep = mobile ? 45 : 30;
+    for (let lon = 0; lon < 360; lon += mStep) {
+      const pts = [];
+      for (let la = -90; la <= 90; la += segStep) { const v = toVec(la, lon); pts.push(project(v[0], v[1], v[2], [0, 0, 0, 0])); }
       line(pts);
     }
-    for (let la = -60; la <= 60; la += 30) {
+    for (let la = -90 + pStep; la < 90; la += pStep) {
       const pts = [];
-      for (let lo = 0; lo <= 360; lo += 10) { const v = toVec(la, lo); pts.push(project(v[0], v[1], v[2], [0, 0, 0, 0])); }
+      for (let lo = 0; lo <= 360; lo += segStep) { const v = toVec(la, lo); pts.push(project(v[0], v[1], v[2], [0, 0, 0, 0])); }
       line(pts);
     }
 
@@ -191,7 +194,7 @@
     if (G.arc) {
       const { a, b, p } = G.arc, steps = 48;
       gctx.strokeStyle = 'rgba(124,196,255,.9)'; gctx.lineWidth = 1.6;
-      gctx.shadowColor = 'rgba(124,196,255,.8)'; gctx.shadowBlur = 8;
+      if (!mobile) { gctx.shadowColor = 'rgba(124,196,255,.8)'; gctx.shadowBlur = 8; } // blur is expensive on phones
       gctx.beginPath();
       for (let k = 0; k <= steps * p; k++) {
         const t = k / steps, v = slerp(a, b, t), lift = 1 + Math.sin(t * Math.PI) * 0.22;
@@ -232,8 +235,8 @@
   /* =========================================================
      Particle lettering
      ========================================================= */
-  const P = mobile ? 1100 : 2400;
-  const SIZE = mobile ? 1.6 : 1.8;
+  const P = mobile ? 700 : 2400;
+  const SIZE = mobile ? 2.2 : 1.8;
   const COLORS = ['#FFFFFF', '#DDE1E6', '#8E949D', '#C9CED5', 'rgba(124,196,255,.95)'];
   const px = new Float32Array(P), py = new Float32Array(P);
   const vx = new Float32Array(P), vy = new Float32Array(P);

@@ -176,9 +176,12 @@
   // ~45 fps cap, paused while the tab is hidden
   let last = 0;
   const start = performance.now();
+  // the loading screen covers the page at first: don't spend GPU on a background nobody can see
+  const loaderEl = document.querySelector('.loader');
+  const covered = () => loaderEl && loaderEl.isConnected && document.documentElement.classList.contains('anim');
   function loop(now) {
     requestAnimationFrame(loop);
-    if (document.hidden || now - last < 22) return;
+    if (document.hidden || now - last < 22 || covered()) return;
     last = now;
     draw((now - start) / 1000 + 24);
   }

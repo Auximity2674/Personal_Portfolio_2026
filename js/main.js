@@ -652,9 +652,11 @@
     });
   })();
 
-  /* ---------------- Experience pipeline: pinned sideways scroll on every screen size ---------------- */
+  /* ---------------- Experience pipeline ----------------
+     Desktop: pinned sideways scroll. Phones: a stack of cards that reveal one by one. */
+  const mm = gsap.matchMedia();
   const steps = $$('.step');
-  {
+  mm.add('(min-width: 861px)', () => {
     const pipe = $('[data-pipeline]');
     const track = $('.pipeline__track');
     const dist = () => Math.max(0, track.scrollWidth - innerWidth);
@@ -670,10 +672,47 @@
       }
     });
     gsap.from(steps, { opacity: 0, x: 80, duration: 1.1, stagger: .08, ease: 'expo.out', scrollTrigger: { trigger: pipe, start: 'top 80%', once: true } });
-  }
+  });
+  mm.add('(max-width: 860px)', () => {
+    steps.forEach(s => {
+      gsap.fromTo(s, { opacity: 0, y: 36, scale: .97 }, {
+        opacity: 1, y: 0, scale: 1, duration: .8, ease: 'expo.out',
+        scrollTrigger: { trigger: s, start: 'top 90%', once: true, onEnter: () => s.classList.add('is-on') }
+      });
+    });
+  });
 
-  /* ---------------- Projects ---------------- */
-  projects.forEach((art, i) => {
+  /* ---------------- Projects ----------------
+     Desktop: one timeline per project, preview and text together, with parallax.
+     Phones: the stacked preview and text each reveal when they reach the screen
+     (so text never animates while it is still below the fold), shorter timings,
+     no parallax, and a gentle scroll tilt instead of the cursor tilt. */
+  mm.add('(max-width: 860px)', () => {
+    projects.forEach((art, i) => {
+      const pv = $('.pv', art), inner = $('svg, .enh', pv), text = $('.project__text', art);
+      gsap.timeline({ scrollTrigger: { trigger: pv, start: 'top 88%', once: true } })
+        .to(pv, { clipPath: 'inset(0% 0 0 0)', duration: 1.05, ease: 'expo.inOut' })
+        .from(inner, { scale: 1.12, duration: 1.2, ease: 'expo.out' }, '<.15')
+        .from($('figcaption', pv), { opacity: 0, y: 8, duration: .5, ease: 'power2.out' }, '-=.5')
+        .add(() => {
+          if (pv.matches('[data-enhance]') && enhanceMain) {
+            const o = { v: 92 };
+            gsap.to(o, { v: 50, duration: 1.3, ease: 'expo.inOut', onUpdate: () => { enhanceMain.set(o.v); enhanceMain.range.value = Math.round(o.v); } });
+          }
+        }, .4);
+      gsap.timeline({ scrollTrigger: { trigger: text, start: 'top 88%', once: true } })
+        .from($('.project__kind', text), { opacity: 0, y: 14, duration: .55, ease: 'expo.out' })
+        .from(projTitleWords[i], { yPercent: 110, duration: .8, stagger: .05, ease: 'expo.out' }, '<.05')
+        .from($('.project__summary', text), { opacity: 0, y: 18, duration: .7, ease: 'expo.out' }, '<.15')
+        .from($$('.chips li', text), { opacity: 0, y: 10, duration: .45, stagger: .03, ease: 'expo.out' }, '<.1')
+        .from($$('.project__actions > *', text), { opacity: 0, y: 12, duration: .55, stagger: .06, ease: 'expo.out' }, '<.1');
+      if (inner.tagName.toLowerCase() === 'svg') {
+        gsap.fromTo(inner, { rotationX: 6 }, { rotationX: -6, ease: 'none', scrollTrigger: { trigger: pv, start: 'top bottom', end: 'bottom top', scrub: .5 } });
+      }
+    });
+  });
+
+  mm.add('(min-width: 861px)', () => projects.forEach((art, i) => {
     const pv = $('.pv', art);
     const inner = $('svg, .enh', pv);
     const text = $('.project__text', art);
@@ -690,7 +729,7 @@
       tl.to(o, { v: 50, duration: 1.6, ease: 'expo.inOut', onUpdate: () => { enhanceMain.set(o.v); enhanceMain.range.value = Math.round(o.v); } }, 0.6);
     }
     gsap.fromTo($('.project__media', art), { yPercent: 6 }, { yPercent: -6, ease: 'none', scrollTrigger: { trigger: art, start: 'top bottom', end: 'bottom top', scrub: true } });
-  });
+  }));
 
   /* Tilt previews toward the cursor */
   if (finePointer) {
@@ -704,15 +743,6 @@
         rx(-((e.clientY - r.top) / r.height - .5) * 8);
       });
       fig.addEventListener('pointerleave', () => { rx(0); ry(0); });
-    });
-  } else {
-    // touch: previews tilt in 3D as they scroll through the screen
-    $$('[data-tilt]').forEach((fig, i) => {
-      const el = $('svg', fig), side = i % 2 ? -1 : 1;
-      gsap.fromTo(el, { rotationX: 10, rotationY: 7 * side }, {
-        rotationX: -10, rotationY: -7 * side, ease: 'none',
-        scrollTrigger: { trigger: fig, start: 'top bottom', end: 'bottom top', scrub: .6 }
-      });
     });
   }
 
