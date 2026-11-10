@@ -1,0 +1,111 @@
+<!doctype html>
+<!--
+  Source for assets/cv/Arsyad-Rizantha-CV.pdf.
+  Edit this file, then regenerate the PDF (see README.md).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Arsyad Rizantha, CV</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&display=block">
+<style>
+  @page { size: A4; margin: 13mm 15mm 12mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Archivo", Arial, sans-serif; color: #0F1B3D; font-size: 9.4pt; line-height: 1.4; }
+  h1, h2, h3, p, ul { margin: 0; }
+  ul { padding-left: 13px; }
+  li { margin: 1px 0; }
+  li::marker { color: #2F7FC1; }
+  header { display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #0F1B3D; padding-bottom: 9px; }
+  h1 { font-size: 26pt; font-stretch: 120%; font-weight: 800; letter-spacing: -.02em; line-height: 1; }
+  .role { font-size: 11pt; font-weight: 600; font-stretch: 90%; margin-top: 6px; }
+  .contact { text-align: right; font-size: 8.8pt; line-height: 1.55; color: #3A4560; }
+  .contact a { color: inherit; text-decoration: none; }
+  h2 { font-size: 10.5pt; font-stretch: 110%; font-weight: 750; margin: 12px 0 5px; display: flex; align-items: center; gap: 8px; }
+  h2::before { content: ""; width: 9px; height: 9px; border: 2px solid #2F7FC1; }
+  .item { margin-bottom: 7px; break-inside: avoid; }
+  .row { display: flex; justify-content: space-between; gap: 12px; }
+  h3 { font-size: 10pt; font-weight: 700; }
+  .meta { color: #56607A; font-stretch: 90%; }
+  .summary { color: #2A3452; }
+  .skills { display: grid; grid-template-columns: 105px 1fr; gap: 3px 10px; }
+  .skills dt { font-weight: 650; font-stretch: 90%; }
+  .skills dd { margin: 0; }
+  .tech { color: #56607A; font-stretch: 90%; margin-top: 2px; }
+</style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Arsyad Rizantha, S.Kom.</h1>
+      <p class="role">Information Technology Graduate</p>
+    </div>
+    <div class="contact">
+      <!-- EDIT: phone, GitHub, LinkedIn -->
+      <a href="mailto:arsyad.rizantha@gmail.com">arsyad.rizantha@gmail.com</a><br>
+      github.com/your-username<br>
+      linkedin.com/in/your-profile<br>
+      Surabaya, Indonesia
+    </div>
+  </header>
+
+  <h2>Profile</h2>
+  <p class="summary">Information Technology fresh graduate with experience in web application development, database design, and information system integration. Possesses strong analytical and problem-solving skills, with the ability to work independently and collaboratively. Experienced in developing a digital legal management system through an internship at PT Industri Kereta Api (Persero). Eager to contribute technical skills, adaptability, and a commitment to continuous learning and professional development in the information technology field.</p>
+
+  <h2>Education</h2>
+  <div class="item">
+    <div class="row"><h3>Institut Teknologi Sepuluh Nopember (ITS), Surabaya</h3><span class="meta"><!-- EDIT: years --></span></div>
+    <div class="row"><p>Bachelor of Computer Science (S.Kom.), Information Technology</p><span><strong>IPK 3.35</strong> <span class="meta">/ 4.00</span></span></div>
+    <p class="meta">Undergraduate Thesis: Deep Learning-Based Sexual Harassment Detection System with Early Warning, AutoRecording, and Encrypted Evidence Transmission Using AES-128 GCM.</p>
+  </div>
+
+  <h2>Experience</h2>
+  <div class="item">
+    <div class="row"><h3>Developer Intern, PT Industri Kereta Api (Persero) (INKA)</h3><span class="meta">Madiun <!-- EDIT: dates --></span></div>
+    <p class="meta">LexSys ProM, a legal management system for the digitalization of the legal division</p>
+    <ul>
+      <li>Analyzed business requirements with the legal division and translated them into system modules.</li>
+      <li>Designed the database structure for legal documents, cases, requirements, deeds, permits, and users.</li>
+      <li>Developed the web application and backend functionality using Laravel.</li>
+      <li>Integrated application components with the database.</li>
+      <li>Conducted User Acceptance Testing (UAT).</li>
+      <li>Prepared the application for deployment.</li>
+    </ul>
+  </div>
+
+  <h2>Projects</h2>
+  <div class="item">
+    <h3>Sexual Harassment Detection System <span class="meta">(undergraduate thesis)</span></h3>
+    <ul>
+      <li>Real-time video detection: YOLOv8 Nano for human detection, CNN-LSTM for activity classification, DenseNet201 as a comparison model.</li>
+      <li>Early warning, automatic recording with a pre-event buffer, and evidence encrypted with AES-128-GCM / AES-256-GCM sent via Telegram.</li>
+    </ul>
+  </div>
+  <div class="item">
+    <h3>LexSys ProM <span class="meta">(internship, PT INKA)</span></h3>
+    <ul><li>Laravel legal management system: document management, case monitoring, legal requirements, deeds, permits, and user management.</li></ul>
+  </div>
+  <div class="item">
+    <h3>UsahaOne</h3>
+    <ul><li>POS and financial management platform for MSMEs (UMKM): transactions, inventory monitoring, finances, and AI-powered real-time financial analysis.</li></ul>
+  </div>
+  <div class="item">
+    <h3>AI Face Similarity System</h3>
+    <ul><li>Flask web app using DeepFace and ArcFace to compare uploaded faces with cosine similarity, Euclidean distance, and Euclidean L2 distance.</li></ul>
+  </div>
+  <div class="item">
+    <h3>Image Enhancement Application</h3>
+    <ul><li>Flask web app for upscaling, noise reduction, and quality improvement of JPG and PNG images.</li></ul>
+  </div>
+
+  <h2>Technical skills</h2>
+  <dl class="skills">
+    <dt>Languages</dt><dd>Python, PHP, JavaScript, SQL, HTML, CSS</dd>
+    <dt>Web &amp; backend</dt><dd>Laravel, Flask, MySQL, REST API integration</dd>
+    <dt>AI &amp; data</dt><dd>YOLOv8, CNN-LSTM, DeepFace, ArcFace, AES-GCM encryption</dd>
+    <dt>Tools</dt><dd>Git, GitHub, Docker, Linux</dd>
+  </dl>
+
+  <!-- EDIT: add a Certifications section here when you have them -->
+</body>
+</html>
