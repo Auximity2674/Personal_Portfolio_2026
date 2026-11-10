@@ -488,9 +488,10 @@
     gsap.to(['.hero__hud', '.hero__frame', '.hero__scroll'], { opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: '40% top', scrub: true } });
   }
 
-  /* ---------------- Weight lens: letters gain weight near the cursor ---------------- */
+  /* ---------------- Weight lens: letters gain weight near the cursor ----------------
+     Touch screens have no cursor, so there a band of weight sweeps across the
+     letters every few seconds, and a touch on the area pulls it to the finger. */
   function weightLens(container, chars, { base = 300, near = 720, radius = 260 } = {}) {
-    if (!finePointer) return;
     let mx = -9999, my = -9999, active = false, raf = null;
     const cur = chars.map(() => base);
     const step = () => {
@@ -506,21 +507,58 @@
       raf = moving ? requestAnimationFrame(step) : null;
     };
     const kick = () => { if (!raf) raf = requestAnimationFrame(step); };
-    container.addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; active = true; kick(); });
-    container.addEventListener('pointerleave', () => { active = false; kick(); });
+    if (finePointer) {
+      container.addEventListener('pointermove', e => { mx = e.clientX; my = e.clientY; active = true; kick(); });
+      container.addEventListener('pointerleave', () => { active = false; kick(); });
+      return;
+    }
+    // smaller lens on phones so the band reads as a few letters, not the whole name
+    radius = Math.max(70, Math.min(radius, innerWidth * .28));
+    // touch: follow the finger while it is down
+    const touchAt = e => { const t = e.touches[0]; if (!t) return; mx = t.clientX; my = t.clientY; active = true; kick(); };
+    container.addEventListener('touchstart', touchAt, { passive: true });
+    container.addEventListener('touchmove', touchAt, { passive: true });
+    container.addEventListener('touchend', () => { setTimeout(() => { active = false; kick(); }, 350); }, { passive: true });
+    // touch: an automatic sweep while the letters are on screen
+    let visible = false, sweeping = false;
+    new IntersectionObserver(([en]) => (visible = en.isIntersecting), { threshold: .3 }).observe(chars[0].parentElement);
+    const sweep = () => {
+      if (visible && !sweeping && chars[0].getBoundingClientRect().width) {
+        sweeping = true;
+        const first = chars[0].getBoundingClientRect(), lastR = chars[chars.length - 1].getBoundingClientRect();
+        const o = { x: first.left - radius * .6 };
+        gsap.to(o, {
+          x: lastR.right + radius * .6, duration: 2.2, ease: 'sine.inOut',
+          onUpdate: () => {
+            // sweep along the middle of whichever line of text is under the band
+            const hit = chars.find(c => { const r = c.getBoundingClientRect(); return o.x >= r.left && o.x <= r.right; }) || chars[0];
+            const r = hit.getBoundingClientRect();
+            mx = o.x; my = r.top + r.height / 2; active = true; kick();
+          },
+          onComplete: () => { active = false; sweeping = false; kick(); }
+        });
+      }
+      setTimeout(sweep, 5200);
+    };
+    setTimeout(sweep, 3200);
   }
   weightLens($('.hero'), heroChars);
   weightLens($('.contact'), mailChars, { base: 300, near: 760, radius: 320 });
 
-  /* Portrait drifts against the cursor */
-  if (finePointer) {
+  /* Portrait drifts against the cursor; on touch screens it floats on its own */
+  {
     const img = $('[data-portrait] img');
-    const px = gsap.quickTo(img, 'xPercent', { duration: 1.2, ease: 'expo.out' });
-    const py = gsap.quickTo(img, 'yPercent', { duration: 1.2, ease: 'expo.out' });
-    $('.hero').addEventListener('pointermove', e => {
-      px((e.clientX / innerWidth - .5) * -3);
-      py((e.clientY / innerHeight - .5) * -3);
-    });
+    if (finePointer) {
+      const px = gsap.quickTo(img, 'xPercent', { duration: 1.2, ease: 'expo.out' });
+      const py = gsap.quickTo(img, 'yPercent', { duration: 1.2, ease: 'expo.out' });
+      $('.hero').addEventListener('pointermove', e => {
+        px((e.clientX / innerWidth - .5) * -3);
+        py((e.clientY / innerHeight - .5) * -3);
+      });
+    } else {
+      gsap.to(img, { xPercent: 1.6, duration: 5.5, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 3 });
+      gsap.to(img, { yPercent: -1.2, duration: 4.2, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 3 });
+    }
   }
 
   /* ---------------- Portrait glitch bursts ---------------- */
@@ -600,8 +638,11 @@
     let x = 0, dir = 1, skew = 0;
     const setX = gsap.quickSetter(track, 'x', 'px');
     const setSkew = gsap.quickSetter(track, 'skewX', 'deg');
+    // velocity from the real scroll position, so it also reacts to native touch scrolling
+    let lastY = scrollY;
     gsap.ticker.add((_, dt) => {
-      const v = lenis ? lenis.velocity : 0;
+      const y = scrollY, v = y - lastY;
+      lastY = y;
       if (v > .5) dir = 1; else if (v < -.5) dir = -1;
       const half = track.scrollWidth / 2;
       x -= (0.06 + Math.min(Math.abs(v) * .02, 1.2)) * dt * dir;
@@ -611,10 +652,9 @@
     });
   })();
 
-  /* ---------------- Experience pipeline ---------------- */
-  const mm = gsap.matchMedia();
+  /* ---------------- Experience pipeline: pinned sideways scroll on every screen size ---------------- */
   const steps = $$('.step');
-  mm.add('(min-width: 861px)', () => {
+  {
     const pipe = $('[data-pipeline]');
     const track = $('.pipeline__track');
     const dist = () => Math.max(0, track.scrollWidth - innerWidth);
@@ -630,13 +670,7 @@
       }
     });
     gsap.from(steps, { opacity: 0, x: 80, duration: 1.1, stagger: .08, ease: 'expo.out', scrollTrigger: { trigger: pipe, start: 'top 80%', once: true } });
-  });
-  mm.add('(max-width: 860px)', () => {
-    steps.forEach(s => {
-      ScrollTrigger.create({ trigger: s, start: 'top 72%', onEnter: () => s.classList.add('is-on'), onLeaveBack: () => s.classList.remove('is-on') });
-      gsap.from(s, { opacity: 0, y: 40, duration: .9, ease: 'expo.out', scrollTrigger: { trigger: s, start: 'top 88%', once: true } });
-    });
-  });
+  }
 
   /* ---------------- Projects ---------------- */
   projects.forEach((art, i) => {
@@ -671,6 +705,15 @@
       });
       fig.addEventListener('pointerleave', () => { rx(0); ry(0); });
     });
+  } else {
+    // touch: previews tilt in 3D as they scroll through the screen
+    $$('[data-tilt]').forEach((fig, i) => {
+      const el = $('svg', fig), side = i % 2 ? -1 : 1;
+      gsap.fromTo(el, { rotationX: 10, rotationY: 7 * side }, {
+        rotationX: -10, rotationY: -7 * side, ease: 'none',
+        scrollTrigger: { trigger: fig, start: 'top bottom', end: 'bottom top', scrub: .6 }
+      });
+    });
   }
 
   /* ---------------- Education mark fills on scroll ---------------- */
@@ -692,6 +735,14 @@
         yTo((e.clientY - (r.top + r.height / 2)) * .38);
       });
       el.addEventListener('pointerleave', () => { xTo(0); yTo(0); });
+    });
+  } else {
+    // touch: buttons press in and spring back
+    $$('[data-magnetic], .cradle__swing, .skill').forEach(el => {
+      el.addEventListener('touchstart', () => gsap.to(el, { scale: .94, duration: .15, ease: 'power2.out', overwrite: 'auto' }), { passive: true });
+      const up = () => gsap.to(el, { scale: 1, duration: .6, ease: 'elastic.out(1, .4)', overwrite: 'auto' });
+      el.addEventListener('touchend', up, { passive: true });
+      el.addEventListener('touchcancel', up, { passive: true });
     });
   }
 

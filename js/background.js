@@ -140,6 +140,17 @@
   if (!reduce && !coarse) {
     addEventListener('pointermove', e => { mouse.tx = e.clientX; mouse.ty = innerHeight - e.clientY; mouse.ton = 1; }, { passive: true });
     document.addEventListener('pointerleave', () => (mouse.ton = 0));
+  } else if (!reduce) {
+    // touch: the glow and lit dots follow the finger, then fade after it lifts
+    let off = null;
+    const touchAt = e => {
+      const t = e.touches[0]; if (!t) return;
+      mouse.tx = t.clientX; mouse.ty = innerHeight - t.clientY; mouse.ton = 1;
+      clearTimeout(off);
+    };
+    addEventListener('touchstart', e => { touchAt(e); mouse.x = mouse.tx; mouse.y = mouse.ty; }, { passive: true });
+    addEventListener('touchmove', touchAt, { passive: true });
+    addEventListener('touchend', () => { off = setTimeout(() => (mouse.ton = 0), 900); }, { passive: true });
   }
 
   function draw(time) {

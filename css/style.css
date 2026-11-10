@@ -993,12 +993,9 @@ button { font: inherit; color: inherit; }
   .hero__title { font-size: clamp(3.4rem, 15vw, 6rem); }
   .about__grid, .exp__intro, .edu, .about__intro { grid-template-columns: 1fr; }
   .cradle { justify-self: center; max-width: 440px; }
-  .pipeline { overflow: visible; }
-  .pipeline__progress { display: none; }
-  .pipeline__track { display: grid; width: auto; padding-inline: var(--gutter); gap: 0; transform: none !important; }
-  .step { width: auto; padding: 0 0 40px 36px; border-left: 1px solid var(--line-2); }
-  .step::before { left: -5px; top: 10px; }
-  .step:last-child { padding-bottom: 0; }
+  /* same pinned sideways scroll as desktop, with narrower steps */
+  .pipeline { padding-bottom: clamp(64px, 12vw, 120px); }
+  .step { width: min(78vw, 340px); padding: 34px 24px 0 0; }
   .step__n { font-size: 2.25rem; margin-bottom: 8px; }
   .edu__brand { font-size: clamp(4rem, 22vw, 7.5rem); }
 }
